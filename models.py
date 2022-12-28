@@ -1,3 +1,5 @@
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,10 +32,15 @@ class CNNModelOneConv(nn.Module):
                 
     def forward(self, x):
         x = self.conv_block(x)
-        x = x.view(-1, 75264)
+        x = x.reshape(-1, 75264)
         x = self.linear_block(x)
         
         return x
+
+    def batch_predict(self, x):
+        logits = self.forward(x.transpose(2, 3).transpose(1, 2))
+        probs = F.softmax(logits, dim=1)
+        return probs.detach().cpu().numpy()
 
 
 class CNNModelTwoConv(nn.Module):
@@ -63,7 +70,12 @@ class CNNModelTwoConv(nn.Module):
                 
     def forward(self, x):
         x = self.conv_block(x)
-        x = x.view(-1, 38 * 38 * 9 * 3)
+        x = x.reshape(-1, 38 * 38 * 9 * 3)
         x = self.linear_block(x)
         
         return x
+
+    def batch_predict(self, x):
+        logits = self.forward(torch.from_numpy(x).type(torch.FloatTensor).transpose(2, 3).transpose(1, 2))
+        probs = F.softmax(logits, dim=1)
+        return probs.detach().cpu().numpy()

@@ -32,7 +32,7 @@ import random
 import time
 
 
-def crop_rotate(background, image, alpha, output_size=None):
+def crop_rotate(background, image, alpha, output_size=None, rotate_background=False):
     """
     Pastes an image onto the background, 
     rotates it and crops to leave no black pixels in corners.
@@ -42,6 +42,7 @@ def crop_rotate(background, image, alpha, output_size=None):
     back = background.copy()
     img = image.copy()
 
+    back = back.rotate(np.random.randint(180) * int(rotate_background))
     back.paste(img, ((back.size[0] - img.size[0]) // 2, (back.size[1] - img.size[1]) // 2))
     back = back.rotate(alpha)
 
@@ -75,6 +76,7 @@ class Generator:
         back = background.copy()
         img = image.copy()
 
+        back = back.rotate(np.random.randint(180) * int(self.rotate_background))
         back.paste(img, ((back.size[0] - img.size[0]) // 2, (back.size[1] - img.size[1]) // 2))
         back = back.rotate(alpha)
 
@@ -106,7 +108,8 @@ class Generator:
             for i in range(min(self.batch_size, len(images) - n * self.batch_size)):
                 y = np.random.randint(len(self.angles))
                 alpha = self.angles[y]
-                batch_x.append(self.transform(self.PREFIX + "dataset/images/" + images[self.batch_size * n + i], np.random.choice(backgrounds), alpha))
+                k = np.random.randint(len(backgrounds))
+                batch_x.append(self.transform(self.PREFIX + "dataset/images/" + images[self.batch_size * n + i], backgrounds[k], alpha))
                 batch_y.append(y if self.model_type == "classifier" else alpha)
             batch_x = torch.from_numpy(np.array(batch_x)).type(torch.FloatTensor)
             if self.preprocessor:
@@ -114,7 +117,8 @@ class Generator:
             batch_y = torch.tensor(batch_y).type(torch.LongTensor)
             yield batch_x, batch_y
 
-    def initialize(self, backgrounds, images):
+    def initialize(self, backgrounds, images, rotate_background=False):
+        self.rotate_background = rotate_background
         self.gen = self.make_generator(backgrounds, images)
         self.len = len(images) // self.batch_size if len(images) % self.batch_size == 0 else len(images) // self.batch_size + 1
 
