@@ -16,3 +16,4 @@
 *DatasetGeneration/gen_passport_dataset.ipynb* - ipython notebook для генерации датасета  
 *passport_rotator.ipynb* - ноутбук, в котором обучается модель для распознавания угла поворота от -30 до 30 градусов  
 *passport_rotator_regressor.ipynb* - обучение регрессора для распознавания угла поворота, не работает (TODO)  
+ссылка на датасет: https://drive.google.com/drive/folders/1sq2jNQTRwCiVkRYI8UQS3qkq_5GtzrEu?usp=share_link
